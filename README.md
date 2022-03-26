@@ -27,10 +27,12 @@ Example Playbook
 ----------------
 
 Install Tinc 1.1 from source on group `servers`.
+```
     - hosts: servers
       become: yes
       roles:
          - haxwithaxe.tinc_install
+```
 
 License
 -------
