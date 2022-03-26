@@ -1,0 +1,12 @@
+---
+- name: Converge
+  hosts: all
+  tasks:
+    - name: Install prerequisites
+      apt:
+        name:
+          - git
+        update_cache: yes
+    - name: "Include haxwithaxe.tinc_install"
+      include_role:
+        name: "haxwithaxe.tinc_install"

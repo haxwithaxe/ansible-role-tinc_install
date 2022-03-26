@@ -1,0 +1,79 @@
+---
+
+- name: Check if tinc is already installed
+  shell: '/usr/local/sbin/tinc --version||true'
+  register: _tinc_version_cmd
+  changed_when: no
+
+- name: Install tinc from source
+  block:
+  - name: Fetch source
+    git:
+      repo: "{{ tinc_repo_uri }}"
+      version: "{{ tinc_repo_version }}"
+      dest: "{{ tinc_build_dir }}"
+
+  - name: Install Debian build deps
+    apt:
+      name:
+        - autoconf
+        - automake
+        - build-essential
+        - libncurses5-dev
+        - libreadline6-dev
+        - libzlcore-dev
+        - zlib1g-dev
+        - liblzo2-dev
+        - libssl-dev
+        - texinfo
+      state: present
+    when: ansible_os_family == 'Debian'
+
+  - name: Autoconfigure Tinc build
+    shell: "autoreconf -fsi"
+    args:
+      chdir: "{{ tinc_build_dir }}"
+
+  - name: Configure Tinc build
+    shell: "./configure"
+    args:
+      chdir: "{{ tinc_build_dir }}"
+
+  - name: Make Tinc
+    shell: "make"
+    args:
+      chdir: "{{ tinc_build_dir }}"
+
+  - name: Install Tinc
+    shell: "make install"
+    args:
+      chdir: "{{ tinc_build_dir }}"
+
+  - name: Make Tinc systemd services
+    shell: "make tinc.service tinc@.service"
+    args:
+      chdir: "{{ tinc_build_dir }}/systemd"
+
+  - name: Ensure the systemd path exists
+    file:
+      path: /usr/local/lib/systemd/system
+      state: directory
+
+  - name: Install Tinc systemd services
+    shell: "cp {{ tinc_build_dir }}/systemd/tinc.service /usr/local/lib/systemd/system/tinc.service"
+
+  - name: Install Tinc systemd @services
+    shell: "cp {{ tinc_build_dir }}/systemd/tinc@.service /usr/local/lib/systemd/system/tinc@.service"
+
+  - name: Ensure the run dir exists
+    file:
+      path: /usr/local/var/run
+      state: directory
+
+  - name: Remove build dir
+    file:
+      path: "{{ tinc_build_dir }}"
+      state: absent
+
+  when: tinc_version not in _tinc_version_cmd.stdout
+  notify: tinc_install_remove_build_deps

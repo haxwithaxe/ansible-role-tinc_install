@@ -1,0 +1,17 @@
+---
+
+- name: tinc_install_remove_build_deps
+  package:
+    name:
+      - autoconf
+      - automake
+      - build-essential
+      - libncurses5-dev
+      - libreadline6-dev
+      - libzlcore-dev
+      - zlib1g-dev
+      - liblzo2-dev
+      - libssl-dev
+      - texinfo
+    state: absent
+  when: not tinc_keep_build_deps|bool

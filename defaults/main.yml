@@ -1,0 +1,6 @@
+---
+tinc_repo_uri: "git://tinc-vpn.org/tinc"
+tinc_version: "1.1pre18"
+tinc_repo_version: "release-1.1pre18"
+tinc_build_dir: "/tmp/tinc"
+tinc_keep_build_deps: no

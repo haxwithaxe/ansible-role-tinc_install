@@ -1,0 +1,16 @@
+---
+
+- name: Verify
+  hosts: all
+  gather_facts: yes
+  tasks:
+    - name: Define expected tinc version
+      set_fact:
+        tinc_version: '1.1pre18'
+    # Using the full path rather than become
+    - name: Get tinc version
+      shell: '/usr/local/sbin/tinc --version || true'
+      register: tinc_version_cmd
+    - name: Assert the installed version of tinc is correct
+      assert:
+        that: 'tinc_version in tinc_version_cmd.stdout'
